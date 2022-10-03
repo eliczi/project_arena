@@ -39,7 +39,6 @@ class Enemy(Character):
         mask = pygame.mask.from_surface(self.image)
         mask_surf = mask.to_surface()
         mask_surf.set_colorkey((0, 0, 0))
-        print('dupsa')
         return mask_surf
 
     def update(self):

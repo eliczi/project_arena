@@ -16,7 +16,7 @@ class Roll:
         self.roll_cooldown = 250
         self.roll_time = 0
 
-    def assign_roll_destination(self):
+    def assign_roll_destination(self): # describe it!!!
         x = [i for i, e in enumerate(self.player.velocity) if e != 0]
         for i in range(2):
             if all(self.player.velocity):
@@ -27,7 +27,7 @@ class Roll:
                 self.roll_destination[i] = self.player.position[i] + self.rolling_distance * sign
             else:
                 self.roll_destination[i] = self.player.position[i]
-        if self.player.velocity[0] == 0 and self.player.velocity[1] == 0:
+        if sum(self.player.velocity) == 0:#self.player.velocity[0] == 0 and self.player.velocity[1] == 0:#
             if self.player.anim_direction == 'right':
                 self.roll_destination[0] = self.player.position[0] + self.rolling_distance
             else:
