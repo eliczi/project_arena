@@ -14,9 +14,8 @@ class GoldDagger(Weapon):
         self.path = f'{self.base_path}{self.name}'
         super().__init__(game, self.name, position, player)
         self.damage = 10
-        self.attack = Attack(game, player, weapon=self)
+        # self.attack = Attack(game, player, weapon=self)
         self.image = pygame.transform.scale(self.image, self.size)
-
         self.special_attack_cooldown = 1.5
         self.mouse_timer = self.special_attack_cooldown
         self.init_timer = False
@@ -47,9 +46,9 @@ class GoldDagger(Weapon):
     def input(self):
         self.update_special_timer()
         for event in self.game.events:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # INITIALISE SPECIAL ATTACK TIMER
                 self.init_timer = True
-            if event.type == pygame.MOUSEBUTTONUP and not self.special_attack and self.mouse_timer < 0:
+            if event.type == pygame.MOUSEBUTTONUP and not self.special_attack and self.mouse_timer < 0:  # if enough time is waited, initialise special attack
                 for par in self.game.particle_manager.particles:
                     if isinstance(par, AttackReady):
                         par.alive = False
@@ -68,12 +67,10 @@ class GoldDagger(Weapon):
         if not self.special_attack:
             return
         if self.index == 0:
-            self.attacks = [[Slash(self.player, self), 0], [Slash(self.player, self), 150],
-                            [Slash(self.player, self), 150],
-                            [Slash(self.player, self), 300], [Slash(self.player, self), 75]]
-        if self.wait(self.timer, self.attacks[self.index][1]):
+            self.attacks = [0, 150, 150, 300, 75]
+        if self.wait(self.timer, self.attacks[self.index]):
             self.timer = pygame.time.get_ticks()
-            self.game.particle_manager.add_particle(self.attacks[self.index][0])
+            self.game.particle_manager.add_particle(Slash(self.player, self))
             self.index += 1
         if self.index == 5:
             self.special_attack = False

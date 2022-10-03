@@ -72,6 +72,7 @@ class Character(Entity):
         self.animation = EntityAnimation(self, game)
         self.dead = False
         self.hurt = False
+        self.facing_direction = 'right'
 
     def load_image(self):
         self.image = pygame.transform.scale(pygame.image.load(f'{self.path}/idle/idle0.png'),

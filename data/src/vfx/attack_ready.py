@@ -69,7 +69,7 @@ class AttackReady:
 
     def correct_position(self):
         position = None
-        if self.player.anim_direction == 'right':
+        if self.player.direction == 'right':
             position = self.player.hitbox.topleft
         else:
             position = self.player.hitbox.topright
@@ -118,7 +118,7 @@ class AttackReady:
             if self.draw_lines:
                 pygame.draw.polygon(surface, self.color, self.lines[0], width=0)
                 pygame.draw.polygon(surface, self.color, self.lines[1], width=0)
-            if self.player.anim_direction == 'right':
+            if self.player.direction == 'right':
                 pygame.draw.circle(surface, self.color, [x / 4 for x in self.player.hitbox.topleft], self.radius, 1)
                 pygame.draw.circle(surface, self.color, [x / 4 for x in self.player.hitbox.topleft], self.radius / 2.5,
                                    1)

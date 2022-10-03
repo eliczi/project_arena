@@ -43,7 +43,9 @@ class Enemy(Character):
 
     def update(self):
         self.animation.update()
-        self.move_towards_player()
+        self.can_move = False
+        if self.can_move:
+            self.move_towards_player()
         self.wall_collision()
         self.rect.update(self.position[0], self.position[1], 64, 64)
         self.hitbox.midbottom = self.rect.midbottom

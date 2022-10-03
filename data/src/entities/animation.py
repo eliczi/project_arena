@@ -26,11 +26,6 @@ class EntityAnimation:
         self.speed = speed
         self.animation_database = load_animation_sprites(self.entity.path)
 
-    def get_direction(self):
-        if self.entity.velocity[0] > 0:
-            self.animation_direction = 'right'
-        elif self.entity.velocity[0] < 0:
-            self.animation_direction = 'left'
 
     def update_animation_frame(self, value=1.5 / 25, reset_frame=4):
         self.animation_frame += value
@@ -39,7 +34,7 @@ class EntityAnimation:
 
     def idle_animation(self, state):
         self.update_animation_frame(self.game.time.dtf() * 7)
-        self.get_direction()
+        #self.get_direction()
         if self.animation_direction == 'right':
             self.entity.image = self.animation_database[state][int(self.animation_frame)]
         elif self.animation_direction == 'left':

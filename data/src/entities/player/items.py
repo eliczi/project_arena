@@ -71,7 +71,7 @@ class Items:
         self.image = pygame.transform.scale(self.image, (70 * 6, 76 * 6))
         self.original_image = self.image
 
-    def draw_item(self, surface, item, key):
+    def draw_item(self, surface, item, key): # change to blit image instead of surface
         position_x = 0 + 9 * 6 + item['position'][1] * 16 * 6 + item['position'][1] * 2 * 6
         position_y = 0 + 9 * 6 + item['position'][0] * 16 * 6 + item['position'][0] * 2 * 6
         pygame.draw.rect(surface, self.empty_slot_color, (position_x, position_y, 16 * 6, 16 * 6))

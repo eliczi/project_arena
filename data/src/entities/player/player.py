@@ -10,7 +10,7 @@ from .items import Items
 
 class Player(Character):
     name = 'red_beard'
-    speed = 100
+    speed = 250
     path = f'data/assets/characters/players/{name}/'
     priority = 100
 
@@ -60,17 +60,16 @@ class Player(Character):
             self.items.draw_items = not self.items.draw_items
         if pressed[pygame.K_e]:
             self.game.object_manager.interaction = True
-
         if all((x, y)):
             x = x * math.sqrt(2) / 2
             y = y * math.sqrt(2) / 2
         self.set_velocity(Vector2(x, y))
-        pressed = pygame.key.get_pressed()
-        if pygame.mouse.get_pressed()[0] and pygame.time.get_ticks() - self.bul > 250:
-            self.bul = pygame.time.get_ticks()
-            pos = pygame.mouse.get_pos()
-            # if len(self.bullets) == 0:
-            #     self.bullets.append(Bullet(self.game, self.rect.center, self, pos))
+        # pressed = pygame.key.get_pressed()
+        # if pygame.mouse.get_pressed()[0] and pygame.time.get_ticks() - self.bul > 250:
+        #     self.bul = pygame.time.get_ticks()
+        #     pos = pygame.mouse.get_pos()
+        #     # if len(self.bullets) == 0:
+        #     #     self.bullets.append(Bullet(self.game, self.rect.center, self, pos))
 
     def input(self):
         # player movement
@@ -79,7 +78,17 @@ class Player(Character):
         # rolling
         self.roll.input()
 
+    def player_position_to_mouse(self):
+        pos = pygame.mouse.get_pos()
+        if self.hitbox.center[0] - pos[0] <= 0:
+            self.animation.animation_direction = 'right'
+            self.direction = 'right'
+        else:
+            self.direction = 'left'
+            self.animation.animation_direction = 'left'
+
     def update(self):
+        self.player_position_to_mouse()
         self.input()
         self.roll.rolling()
         self.wall_collision()

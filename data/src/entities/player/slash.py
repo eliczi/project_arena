@@ -92,8 +92,8 @@ class Slash:
                     self.add_effect(e.hitbox.center)
                     e.hurt = True
                     e.hurt_timer = pygame.time.get_ticks()
-                    #self.game.time.slow_time =True
-                    #self.game.time.slow_down_cooldown = pygame.time.get_ticks()
+                    self.game.time.slow_down.init_slow_down(3000, 0.1)
+
                     e.hp -= 5
                     # pygame.mixer.Sound.play(self.sound)
                 self.hit.append(e)
