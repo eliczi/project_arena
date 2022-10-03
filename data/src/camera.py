@@ -118,7 +118,6 @@ class Camera:
 
     def reset(self):
         self.adjust = True
-
         self.zoom_target_x = 800
         self.zoom_target_y = 768/2
         # self.zoom_target_x = object.rect.center[0]
