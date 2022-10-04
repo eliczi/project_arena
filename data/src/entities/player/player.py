@@ -6,6 +6,7 @@ from .roll import Roll
 from data.src.objects.weapons.gold_dagger import GoldDagger
 from data.src.objects.bullet import Bullet
 from .items import Items
+from .attributes import Attributes
 
 
 class Player(Character):
@@ -27,6 +28,8 @@ class Player(Character):
         self.bullets = []
         self.can_attack = True
         self.items = Items(game)
+        self.player = True
+        self.attributes = Attributes(game, self)
 
     def wait(self, time, amount):
         if pygame.time.get_ticks() - time > amount / self.game.time.game_speed:
@@ -107,6 +110,6 @@ class Player(Character):
         else:
             surface.blit(self.image, self.game.camera.blit_position(self))
         self.items.draw(surface)
-
+        self.attributes.draw()
         # pygame.draw.rect(surface, (255, 255, 255), self.rect, 1)
         # pygame.draw.rect(surface, (255, 255, 255), self.hitbox, 1)

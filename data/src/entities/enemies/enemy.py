@@ -2,11 +2,12 @@ import pygame
 import random
 from data.src.entities.entity import Character
 from data.src.entities.player.attack import Attack
+from data.src.entities.player.slash import Slash
 
 
 class Enemy(Character):
     name = 'orc_warrior'
-    speed = 96
+    speed = 160
     path = f'data/assets/characters/{name}/'
     max_hp = 100
     hp = max_hp
@@ -19,17 +20,29 @@ class Enemy(Character):
         self.roll = False
         self.position = [self.rect.topleft[0], self.rect.topleft[1]]
         self.hurt_timer = 0
+        self.attack_timer = 0
 
-    def move_towards_player(self, proximity=64):
+    def move_towards_player(self, proximity=0):
         dt = self.game.time.dtf()
-        dir_vector = pygame.math.Vector2(self.game.player.hitbox.centerx - self.hitbox.centerx,
-                                         self.game.player.hitbox.centery - self.hitbox.centery)
+        x = -1 if int(self.game.player.position[0]) > int(self.position[0]) else 1
+        dir_vector = pygame.math.Vector2(self.game.player.hitbox.midbottom[0] + 64 * x - self.hitbox.midbottom[0],
+                                         self.game.player.hitbox.midbottom[1] - self.hitbox.midbottom[1])
         if dir_vector.length() > proximity:
             if dir_vector.length_squared() > 0:
                 dir_vector.scale_to_length(self.speed * dt * self.speed_multiplier)
                 self.set_velocity(dir_vector)
+                self.set_direction()
+                self.can_attack = False
         else:
             self.set_velocity([0, 0])
+            self.can_attack = True
+
+    def set_direction(self):
+        if self.position[0] < self.game.player.position[0]:
+            self.animation.animation_direction = 'right'
+        else:
+            self.animation.animation_direction = 'left'
+
 
     def detect_collision(self):
         if self.hitbox.colliderect(self.game.player.hitbox):
@@ -41,14 +54,19 @@ class Enemy(Character):
         mask_surf.set_colorkey((0, 0, 0))
         return mask_surf
 
+    def attack(self):
+        self.game.particle_manager.add_particle(Slash(self, self))
+
     def update(self):
         self.animation.update()
-        self.can_move = False
         if self.can_move:
             self.move_towards_player()
         self.wall_collision()
         self.rect.update(self.position[0], self.position[1], 64, 64)
         self.hitbox.midbottom = self.rect.midbottom
+        if self.can_attack and pygame.time.get_ticks() - self.attack_timer > 500:
+            self.attack_timer = pygame.time.get_ticks()
+            self.attack()
         if self.hp <= 0:
             self.dead = True
         if pygame.time.get_ticks() - self.hurt_timer > 150 / self.game.time.game_speed:

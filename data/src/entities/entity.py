@@ -48,7 +48,10 @@ class Entity:
         self.can_move = True
         self.position = []
         self.shadow = Shadow(game, self)
-        #self.game.particle_manager.add_particle(self.shadow)
+        self.direction = 'right'
+        self.can_attack = False
+        self.player = False
+        # self.game.particle_manager.add_particle(self.shadow)
 
     def load_image(self):
         pass
@@ -72,7 +75,7 @@ class Character(Entity):
         self.animation = EntityAnimation(self, game)
         self.dead = False
         self.hurt = False
-        self.facing_direction = 'right'
+        self.targetable = True
 
     def load_image(self):
         self.image = pygame.transform.scale(pygame.image.load(f'{self.path}/idle/idle0.png'),

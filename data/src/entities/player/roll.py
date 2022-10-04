@@ -41,7 +41,9 @@ class Roll:
 
     def rolling(self):
         if not self.roll:
+            self.player.targetable = True
             return
+        self.player.targetable = False
         vector = Vector2(self.roll_destination[0] - self.player.position[0],
                          self.roll_destination[1] - self.player.position[1])
         if vector.length() < 5:

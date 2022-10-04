@@ -30,7 +30,7 @@ class Game:
         self.object_manager = ObjectManager(self)
         self.enemy_manager = EnemyManager(self)
         self.camera = Camera(self)
-        self.map = Arena(self)
+        self.map = Market(self)
         self.menu = MainMenu(self)
         self.rect = pygame.Rect(0, 0, 250, 250)
         self.events = []
