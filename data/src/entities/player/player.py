@@ -4,6 +4,7 @@ from pygame.math import Vector2
 import math
 from .roll import Roll
 from data.src.objects.weapons.gold_dagger import GoldDagger
+from data.src.objects.weapons.hammer import Hammer
 from data.src.objects.bullet import Bullet
 from .items import Items
 from .attributes import Attributes
@@ -22,8 +23,12 @@ class Jump:
 
     def update(self, dt):
         x, y = 0, 0
+        if self.player.height + 25 >= self.maximum_height:
+            self.player.game.time.slow_down.init_slow_down(2000, 0.1)
         if self.player.height >= self.maximum_height:  # check if player reached maximum jump height
             self.top = True
+        if self.top and self.player.height <=50:
+            self.player.game.time.slow_down.init_slow_down(300,0.25)
         if not self.top:
             y -= dt * self.player.speed * self.player.speed_multiplier
             x += dt * self.player.speed * self.player.speed_multiplier * self.direction
@@ -38,7 +43,8 @@ class Jump:
                 self.top = False
                 a = GroundRipple(self.player.game, (self.player.hitbox.midbottom[0], self.player.hitbox.midbottom[1]))
                 self.player.game.particle_manager.add_particle(a)
-                #self.player.game.time.slow_down.init_slow_down(500, 0.25)
+                self.player.game.display.timer = pygame.time.get_ticks()
+                self.player.game.time.slow_down.init_slow_down(2000, 0.25)
         self.player.set_velocity(Vector2(x, y))
 
 
@@ -65,6 +71,7 @@ class Player(Character):
         self.attributes = Attributes(game, self)
         self.jump = Jump(self)
         self.game.particle_manager.add_particle(self.shadow)
+        self.items.assign_item(Hammer(game, (0,0), self), self)
 
     def wait(self, time, amount):
         if pygame.time.get_ticks() - time > amount / self.game.time.game_speed:
@@ -141,11 +148,12 @@ class Player(Character):
     def draw(self, surface):
         if self.game.camera.zoom != 1:
             self.resize()
-        if self.bullets:
-            surface.blit(self.image, self.game.camera.center_blit(self, self.bullets[0]))
         else:
             surface.blit(self.image, self.game.camera.blit_position(self))
         self.items.draw(surface)
         self.attributes.draw()
+        # if self.jump.jump:
+        item = self.items.items['weapon']['item']
+        surface.blit(item.image, item.rect)
         # pygame.draw.rect(surface, (255, 255, 255), self.rect, 1)
         # pygame.draw.rect(surface, (255, 255, 255), self.hitbox, 1)

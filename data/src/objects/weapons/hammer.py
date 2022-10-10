@@ -30,9 +30,9 @@ class Hammer(Weapon):
     def interact(self):
         self.interaction = False
         self.show_name.reset_line_length()
-        self.player = self.game.player
+        self.entity = self.game.player
         self.game.object_manager.remove_item(self)
-        self.player.items.items['weapon']['item'] = self
+        self.entity.items.items['weapon']['item'] = self
 
     def update_special_timer(self):
         if self.init_timer:
@@ -40,7 +40,7 @@ class Hammer(Weapon):
         else:
             self.mouse_timer = self.special_attack_cooldown
         if self.mouse_timer < 0 and self.dupa:
-            self.game.particle_manager.add_particle(AttackReady(self.player.hitbox.topleft, self.player))
+            self.game.particle_manager.add_particle(AttackReady(self.entity.hitbox.topleft, self.entity))
             self.dupa = False
 
     def input(self):
@@ -67,15 +67,16 @@ class Hammer(Weapon):
         if not self.special_attack:
             return
         #Player jumps and attack with heavy blow, dealing AOE damage to enemies
-        self.player.jump.jump = True
-        #self.game.time.slow_down.init_slow_down(500, 0.1)
-        if self.player.animation.animation_direction == 'left':
-            self.player.jump.direction = -1
+        self.entity.jump.jump = True
+        self.game.time.slow_down.init_slow_down(10000, 3)
+        if self.entity.animation.animation_direction == 'left':
+            self.entity.jump.direction = -1
         else:
-            self.player.jump.direction = 1
-        x = GroundRipple(self.game, (self.player.hitbox.midbottom[0], self.player.hitbox.midbottom[1]))
+            self.entity.jump.direction = 1
+        x = GroundRipple(self.game, (self.entity.hitbox.midbottom[0], self.entity.hitbox.midbottom[1]))
         self.game.particle_manager.add_particle(x)
         self.special_attack = False
+        self.game.display.timer = pygame.time.get_ticks()
         # if self.index == 0:
         #     self.attacks = [0]
         # if self.wait(self.timer, self.attacks[self.index]):
@@ -88,12 +89,14 @@ class Hammer(Weapon):
 
     def normal_attack_update(self):
         if self.normal_attack:
-            self.game.particle_manager.add_particle(Slash(self.player, self))
+            self.game.particle_manager.add_particle(Slash(self.entity, self))
             self.normal_attack = False
 
     def update(self):
         super().update()
-        if self.player:
+        if self.entity.jump.jump:
+            self.weapon_swing.swing()
+        if self.entity:
             self.input()
             self.update_special_timer()
             self.special_attack_update()

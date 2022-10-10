@@ -85,11 +85,11 @@ class Object:
     size = (64, 64)
     type = None
 
-    def __init__(self, game, name, position, player=None):
+    def __init__(self, game, name, position, entity=None):
         self.game = game
         self.name = name
         self.position = position
-        self.player = player
+        self.entity = entity
         self.original_image = None
         self.image = None
         self.load_image()

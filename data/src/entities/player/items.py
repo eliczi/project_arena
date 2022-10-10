@@ -1,10 +1,12 @@
 import pygame
+from data.src.objects.weapons.hammer import Hammer
 
 
 class Items:
 
-    def __init__(self, game):
+    def __init__(self, game, entity=None):
         self.game = game
+        self.entity = entity
         self.image = None
         self.original_image = None
         self.load_image()
@@ -95,3 +97,7 @@ class Items:
         if self.draw_items:
             self.draw_eq_items()
             surface.blit(self.image, self.rect)
+
+    def assign_item(self, item, entity):
+        self.items[item.type]['item'] = item
+        item.entity = entity
