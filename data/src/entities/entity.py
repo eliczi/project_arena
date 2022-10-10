@@ -28,7 +28,7 @@ class Shadow:
         self.index = 0
 
     def update(self, dt):
-        self.rect.midtop = (self.player.rect.midbottom[0] / 4, self.player.rect.midbottom[1] / 4)
+        self.rect.midtop = (self.player.rect.midbottom[0] / 4, (self.player.rect.midbottom[1] + self.player.height)/ 4 )
         self.rect.size = self.sizes[int(self.index)]
 
     def draw(self, surface):
@@ -51,6 +51,7 @@ class Entity:
         self.direction = 'right'
         self.can_attack = False
         self.player = False
+        self.height = 0
         # self.game.particle_manager.add_particle(self.shadow)
 
     def load_image(self):

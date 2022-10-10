@@ -1,10 +1,11 @@
 import pygame
 from data.src.objects.weapons.gold_dagger import GoldDagger
+from data.src.objects.weapons.big_golden_sword import BigGoldenSword
 
 
 class ObjectManager:
     def __init__(self, game):
-        self.objects = [GoldDagger(game, (250, 600))]
+        self.objects = []
         self.game = game
         self.interaction = False
 

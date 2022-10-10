@@ -7,6 +7,39 @@ from data.src.objects.weapons.gold_dagger import GoldDagger
 from data.src.objects.bullet import Bullet
 from .items import Items
 from .attributes import Attributes
+from data.src.entities.player.slash import Slash
+from data.src.vfx.ground_ripple import GroundRipple
+
+
+class Jump:
+    def __init__(self, player):
+        self.player = player
+        self.duration = 100
+        self.jump = False
+        self.maximum_height = 100
+        self.top = False
+        self.direction = 1
+
+    def update(self, dt):
+        x, y = 0, 0
+        if self.player.height >= self.maximum_height:  # check if player reached maximum jump height
+            self.top = True
+        if not self.top:
+            y -= dt * self.player.speed * self.player.speed_multiplier
+            x += dt * self.player.speed * self.player.speed_multiplier * self.direction
+            self.player.height += dt * self.player.speed * self.player.speed_multiplier
+        else:
+            y += dt * self.player.speed * self.player.speed_multiplier
+            x += dt * self.player.speed * self.player.speed_multiplier * self.direction
+            self.player.height -= dt * self.player.speed * self.player.speed_multiplier
+            if self.player.height <= 0:
+                # self.player.game.particle_manager.add_particle(Slash(self.player, self.player.game))
+                self.jump = False
+                self.top = False
+                a = GroundRipple(self.player.game, (self.player.hitbox.midbottom[0], self.player.hitbox.midbottom[1]))
+                self.player.game.particle_manager.add_particle(a)
+                #self.player.game.time.slow_down.init_slow_down(500, 0.25)
+        self.player.set_velocity(Vector2(x, y))
 
 
 class Player(Character):
@@ -30,6 +63,8 @@ class Player(Character):
         self.items = Items(game)
         self.player = True
         self.attributes = Attributes(game, self)
+        self.jump = Jump(self)
+        self.game.particle_manager.add_particle(self.shadow)
 
     def wait(self, time, amount):
         if pygame.time.get_ticks() - time > amount / self.game.time.game_speed:
@@ -63,16 +98,14 @@ class Player(Character):
             self.items.draw_items = not self.items.draw_items
         if pressed[pygame.K_e]:
             self.game.object_manager.interaction = True
+            self.game.npc_manager.interaction = True
+        else:
+            self.game.object_manager.interaction = False
+            self.game.npc_manager.interaction = False
         if all((x, y)):
             x = x * math.sqrt(2) / 2
             y = y * math.sqrt(2) / 2
         self.set_velocity(Vector2(x, y))
-        # pressed = pygame.key.get_pressed()
-        # if pygame.mouse.get_pressed()[0] and pygame.time.get_ticks() - self.bul > 250:
-        #     self.bul = pygame.time.get_ticks()
-        #     pos = pygame.mouse.get_pos()
-        #     # if len(self.bullets) == 0:
-        #     #     self.bullets.append(Bullet(self.game, self.rect.center, self, pos))
 
     def input(self):
         # player movement
@@ -91,10 +124,13 @@ class Player(Character):
             self.animation.animation_direction = 'left'
 
     def update(self):
-        self.player_position_to_mouse()
-        self.input()
-        self.roll.rolling()
-        self.wall_collision()
+        if self.jump.jump:
+            self.jump.update(self.game.time.dtf())
+        else:
+            self.player_position_to_mouse()
+            self.input()
+            self.roll.rolling()
+            self.wall_collision()
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
         self.animation.update()

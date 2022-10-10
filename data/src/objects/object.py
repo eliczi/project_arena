@@ -2,6 +2,9 @@ import pygame
 import random
 import math
 from ..setup import get_mask_rect
+from data.src.utils.utils import perfect_outline
+
+font = pygame.font.SysFont('Bitty', 30)
 
 
 class ShowName:
@@ -80,6 +83,7 @@ class Hovering:
 
 class Object:
     size = (64, 64)
+    type = None
 
     def __init__(self, game, name, position, player=None):
         self.game = game
@@ -95,6 +99,11 @@ class Object:
         self.bounce = None
         self.interaction = False
         self.update_hitbox()
+        self.draw_merchant = False
+        self.price = 15
+        self.animation_frame = 0
+        self.images = []
+        self.load_images()
 
     def wait(self, time, amount):
         if pygame.time.get_ticks() - time > amount / self.game.time.game_speed:
@@ -105,15 +114,6 @@ class Object:
         self.original_image = pygame.transform.scale(pygame.image.load(
             f'{self.path}/{self.name}.png').convert_alpha(), self.size)
         self.image = self.original_image
-
-    def perfect_outline(self, loc, surface):
-        mask = pygame.mask.from_surface(self.image)
-        mask_surf = mask.to_surface()
-        mask_surf.set_colorkey((0, 0, 0))
-        surface.blit(mask_surf, (loc[0] - 4, loc[1]))
-        surface.blit(mask_surf, (loc[0] + 4, loc[1]))
-        surface.blit(mask_surf, (loc[0], loc[1] - 4))
-        surface.blit(mask_surf, (loc[0], loc[1] + 4))
 
     def detect_collision(self):
         if self.game.player.hitbox.colliderect(self.hitbox):
@@ -129,16 +129,53 @@ class Object:
     def update(self):
         self.update_hitbox()
         self.detect_collision()
+        self.update_animation_frame()
 
     def draw_outline(self, surface):
         if self.interaction:
-            self.perfect_outline(self.rect, surface)
+            perfect_outline(self.image, self.rect, surface)
 
-    def draw(self, surface):
-        self.draw_outline(surface)
-        surface.blit(self.image, (self.rect.x, self.rect.y))
+    def draw(self, surface, position=None):
+        if position:
+            surface.blit(self.image, position)
+            self.draw_outline(surface)
+        else:
+            surface.blit(self.image, (self.rect.x, self.rect.y))
+            self.draw_outline(surface)
         if self.interaction:
             self.show_name.draw(surface, self.rect)
+        # self.draw_merchant_information(surface)
+        pygame.draw.rect(surface, (255, 120, 250), self.rect, 5)
+
+    def load_images(self):
+        for i in range(4):
+            image = pygame.image.load(f'data/assets/coin/coin/coin{i}.png').convert_alpha()
+            image = pygame.transform.scale(image, (16,16))
+            self.images.append(image)
+
+    def update_animation_frame(self):
+        self.animation_frame += ((1.5 + (random.randint(1, 5) / 10)) / 15)  * self.game.time.game_speed
+        if self.animation_frame > 3:
+            self.animation_frame = 0
+
+    def draw_merchant_information(self, surface):
+        positions = {'coin_position': (10, 10),
+                     'attack_position': (10, 26)}
+        if self.draw_merchant:
+            self.update_animation_frame()
+            pos = pygame.mouse.get_pos()
+            attack = pygame.transform.scale(
+                surface=pygame.image.load(f'data/assets/attack.png').convert_alpha(),
+                size=(16, 16)
+            )
+
+            pygame.draw.rect(surface, (143, 86, 59), rect=(pos[0], pos[1], 128, 64))
+            pygame.draw.rect(surface, (102, 57, 49), rect=(pos[0], pos[1], 128, 64), width=5)
+            surface.blit(self.images[int(self.animation_frame)], (pos[0] + 10, pos[1] + 10))
+            surface.blit(attack, (pos[0] + 10, pos[1] + 36))
+        # text_surface = font.render(f'{self.price}', False, (255, 255, 255))
+        # self.game.display.screen.blit(text_surface, (pos[0], pos[1]))
+        # surface.blit(self.image, (self.rect.x, self.rect.y))
 
     def __str__(self):
         return self.name

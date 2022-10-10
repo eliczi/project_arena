@@ -25,7 +25,6 @@ class AttackReady:
         self.speed = 20
         self.radius = 1
         self.draw_lines = True
-
         self.calculate_direction()
         self.dir2 = None
         self.calculate_direction2()

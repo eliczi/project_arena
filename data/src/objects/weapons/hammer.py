@@ -4,18 +4,16 @@ from .weapon import Weapon
 from data.src.entities.player.attack import Attack
 from data.src.vfx.attack_ready import AttackReady
 from data.src.entities.player.slash import Slash
+from data.src.vfx.ground_ripple import GroundRipple
 
-
-class GoldDagger(Weapon):
-    name = 'gold_dagger'
-    size = (64, 64)
-    special_attack = "Series of quick, powerful attack"
-    slot = 'small'
+class Hammer(Weapon):
+    name = 'hammer'
+    size = (64, 128)
 
     def __init__(self, game, position, player=None):
         self.path = f'{self.base_path}{self.name}'
         super().__init__(game, self.name, position, player)
-        self.damage = 15
+        self.damage = 25
         # self.attack = Attack(game, player, weapon=self)
         self.image = pygame.transform.scale(self.image, self.size)
         self.special_attack_cooldown = 1.5
@@ -51,7 +49,7 @@ class GoldDagger(Weapon):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # INITIALISE SPECIAL ATTACK TIMER
                 self.init_timer = True
             if event.type == pygame.MOUSEBUTTONUP and not self.special_attack and self.mouse_timer < 0:  # if enough time is waited, initialise special attack
-                for par in self.game.particle_manager.particles:
+                for par in self.game.particle_manager.particles: # delete attack ready particle
                     if isinstance(par, AttackReady):
                         par.alive = False
                 self.init_timer = False
@@ -68,15 +66,25 @@ class GoldDagger(Weapon):
     def special_attack_update(self):
         if not self.special_attack:
             return
-        if self.index == 0:
-            self.attacks = [0, 150, 150, 300, 75]
-        if self.wait(self.timer, self.attacks[self.index]):
-            self.timer = pygame.time.get_ticks()
-            self.game.particle_manager.add_particle(Slash(self.player, self))
-            self.index += 1
-        if self.index == 5:
-            self.special_attack = False
-            self.index = 0
+        #Player jumps and attack with heavy blow, dealing AOE damage to enemies
+        self.player.jump.jump = True
+        #self.game.time.slow_down.init_slow_down(500, 0.1)
+        if self.player.animation.animation_direction == 'left':
+            self.player.jump.direction = -1
+        else:
+            self.player.jump.direction = 1
+        x = GroundRipple(self.game, (self.player.hitbox.midbottom[0], self.player.hitbox.midbottom[1]))
+        self.game.particle_manager.add_particle(x)
+        self.special_attack = False
+        # if self.index == 0:
+        #     self.attacks = [0]
+        # if self.wait(self.timer, self.attacks[self.index]):
+        #     self.timer = pygame.time.get_ticks()
+        #     self.game.particle_manager.add_particle(Slash(self.player, self))
+        #     self.index += 1
+        # if self.index == 1:
+        #     self.special_attack = False
+        #     self.index = 0
 
     def normal_attack_update(self):
         if self.normal_attack:

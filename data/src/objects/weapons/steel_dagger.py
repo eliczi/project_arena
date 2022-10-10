@@ -6,16 +6,14 @@ from data.src.vfx.attack_ready import AttackReady
 from data.src.entities.player.slash import Slash
 
 
-class GoldDagger(Weapon):
-    name = 'gold_dagger'
+class SteelDagger(Weapon):
+    name = 'steel_dagger'
     size = (64, 64)
-    special_attack = "Series of quick, powerful attack"
-    slot = 'small'
 
     def __init__(self, game, position, player=None):
         self.path = f'{self.base_path}{self.name}'
         super().__init__(game, self.name, position, player)
-        self.damage = 15
+        self.damage = 10
         # self.attack = Attack(game, player, weapon=self)
         self.image = pygame.transform.scale(self.image, self.size)
         self.special_attack_cooldown = 1.5

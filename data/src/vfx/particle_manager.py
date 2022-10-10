@@ -13,7 +13,7 @@ class ParticleManager:
 
     def remove_particles(self):
         for particle in self.particles:
-            if particle.alive is False:
+            if not particle.alive:
                 self.particles.remove(particle)
 
     def update(self):

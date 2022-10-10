@@ -8,7 +8,7 @@ class Items:
         self.image = None
         self.original_image = None
         self.load_image()
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(center=(400, 400))
         self.items = {'ring1': {'item': None,
                                 'position': (0, 0)},
                       'helmet': {'item': None,
@@ -34,7 +34,7 @@ class Items:
         self.mouse_down = False
         self.position = None
         self.change_position = True
-        self.original_position = [0, 0]
+        self.original_position = [400, 400]
         self.empty_slot_color = (143, 86, 59)
 
     def can_draw(self):
@@ -84,7 +84,7 @@ class Items:
         image = pygame.transform.scale(image, (item['item'].size[0] * 1.5, item['item'].size[1] * 1.5))
         if key == 'weapon':
             pygame.draw.rect(surface, self.empty_slot_color, (position_x, position_y + 88, 16 * 6, 16 * 6))
-            surface.blit(image, (position_x, position_y + 88))
+            surface.blit(image, (position_x, position_y))
 
     def draw_eq_items(self):
         for key, item in self.items.items():

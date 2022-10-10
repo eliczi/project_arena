@@ -122,4 +122,4 @@ class Slash:
                                               self.game.camera.blit_position(self))
             else:
                 self.game.display.screen.blit(self.image, self.game.camera.blit_position(self))
-        # pygame.draw.rect(self.game.display.screen, (244, 123, 32), self.attack_rect, 1)
+        #pygame.draw.rect(self.game.display.screen, (244, 123, 32), self.attack_rect, 1)

@@ -15,10 +15,11 @@ class Attributes:
         self.vitality = 0
         self.charisma = 0
         self.stamina = 0 # how fast roll regenerates
-        self.rolls = 5
+        self.rolls = 1
         self.magicka = 0
         self.max_hp = 100
         self.hp = self.max_hp
+        self.gold = 100
 
 
     def draw(self):
