@@ -14,8 +14,10 @@ class Attributes:
         self.defense = 0
         self.vitality = 0
         self.charisma = 0
-        self.stamina = 0 # how fast roll regenerates
-        self.rolls = 1
+        self.max_stamina = 100
+        self.stamina = self.max_stamina
+        self.max_rolls = 1
+        self.rolls = self.max_rolls
         self.magicka = 0
         self.max_hp = 100
         self.hp = self.max_hp

@@ -10,43 +10,9 @@ from .items import Items
 from .attributes import Attributes
 from data.src.entities.player.slash import Slash
 from data.src.vfx.ground_ripple import GroundRipple
-
-
-class Jump:
-    def __init__(self, player):
-        self.player = player
-        self.duration = 100
-        self.jump = False
-        self.maximum_height = 100
-        self.top = False
-        self.direction = 1
-
-    def update(self, dt):
-        x, y = 0, 0
-        if self.player.height + 25 >= self.maximum_height:
-            self.player.game.time.slow_down.init_slow_down(2000, 0.1)
-        if self.player.height >= self.maximum_height:  # check if player reached maximum jump height
-            self.top = True
-        if self.top and self.player.height <=50:
-            self.player.game.time.slow_down.init_slow_down(300,0.25)
-        if not self.top:
-            y -= dt * self.player.speed * self.player.speed_multiplier
-            x += dt * self.player.speed * self.player.speed_multiplier * self.direction
-            self.player.height += dt * self.player.speed * self.player.speed_multiplier
-        else:
-            y += dt * self.player.speed * self.player.speed_multiplier
-            x += dt * self.player.speed * self.player.speed_multiplier * self.direction
-            self.player.height -= dt * self.player.speed * self.player.speed_multiplier
-            if self.player.height <= 0:
-                # self.player.game.particle_manager.add_particle(Slash(self.player, self.player.game))
-                self.jump = False
-                self.top = False
-                a = GroundRipple(self.player.game, (self.player.hitbox.midbottom[0], self.player.hitbox.midbottom[1]))
-                self.player.game.particle_manager.add_particle(a)
-                self.player.game.display.timer = pygame.time.get_ticks()
-                self.player.game.time.slow_down.init_slow_down(2000, 0.25)
-        self.player.set_velocity(Vector2(x, y))
-
+#import sand class
+from data.src.vfx.sand import Sand
+from .player_info import Hud
 
 class Player(Character):
     name = 'red_beard'
@@ -54,9 +20,10 @@ class Player(Character):
     path = f'data/assets/characters/players/{name}/'
     priority = 100
 
+
     def __init__(self, game):
         Character.__init__(self, game)
-        self.rect = self.image.get_rect(center=(800, 768 / 2))
+        self.rect = self.image.get_rect(center=(800, 832 / 2))
         self.update_hitbox()
         self.time = 0
         self.velocity = Vector2(0, 0)
@@ -69,9 +36,9 @@ class Player(Character):
         self.items = Items(game)
         self.player = True
         self.attributes = Attributes(game, self)
-        self.jump = Jump(self)
         self.game.particle_manager.add_particle(self.shadow)
-        self.items.assign_item(Hammer(game, (0,0), self), self)
+        self.items.assign_item(Hammer(game, (0, 0), self), self)
+        self.hud = Hud(self, game)
 
     def wait(self, time, amount):
         if pygame.time.get_ticks() - time > amount / self.game.time.game_speed:
@@ -90,19 +57,20 @@ class Player(Character):
     def move_player(self):
         x, y = 0, 0
         pressed = pygame.key.get_pressed()
-        dt = self.game.time.dtf()
+        change_factor = self.game.time.dtf() * self.speed * self.speed_multiplier
         if pressed[pygame.K_w]:
-            y -= dt * self.speed * self.speed_multiplier
+            y -= change_factor
         if pressed[pygame.K_s]:
-            y += dt * self.speed * self.speed_multiplier
+            y += change_factor
         if pressed[pygame.K_a]:
-            x -= dt * self.speed * self.speed_multiplier
+            x -= change_factor
             self.anim_direction = 'left'
         if pressed[pygame.K_d]:
-            x += dt * self.speed * self.speed_multiplier
+            x += change_factor
             self.anim_direction = 'right'
         if pressed[pygame.K_i] and self.items.can_draw():
             self.items.draw_items = not self.items.draw_items
+            
         if pressed[pygame.K_e]:
             self.game.object_manager.interaction = True
             self.game.npc_manager.interaction = True
@@ -131,29 +99,39 @@ class Player(Character):
             self.animation.animation_direction = 'left'
 
     def update(self):
-        if self.jump.jump:
-            self.jump.update(self.game.time.dtf())
-        else:
+        
+        # if self.jump.jump:
+        #     self.jump.update(self.game.time.dtf())
+        if self.height == 0:
             self.player_position_to_mouse()
             self.input()
-            self.roll.rolling()
+            self.roll.update()
             self.wall_collision()
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        self.position = [x + self.velocity[i] for i, x in enumerate(self.position)]
+        self.correct_position()
         self.animation.update()
-        self.rect.update(self.position[0], self.position[1], 64, 64)
-        self.hitbox.midbottom = self.rect.midbottom
-        self.items.update()
+        #print("position: ", self.position, "rect: ", self.hitbox)
 
-    def draw(self, surface):
-        if self.game.camera.zoom != 1:
-            self.resize()
+        self.rect.move_ip(*self.velocity)
+        self.hitbox.move_ip(*self.velocity)
+        #self.rect.update(self.position[0], self.position[1], 64, 64)
+        #self.hitbox.midbottom = self.rect.midbottom
+        self.items.update()
+        if pygame.time.get_ticks() - self.hurt_timer > 300 / self.game.time.game_speed:
+            self.hurt = False
+            self.hurt_timer = pygame.time.get_ticks()
+            
+
+
+    def draw(self, surface: pygame.Surface) -> None:
+        self.hud.draw(surface)
+        self.resize()
+        if self.hurt:
+            surface.blit(self.hurting(), self.get_blit_position())
         else:
-            surface.blit(self.image, self.game.camera.blit_position(self))
+            surface.blit(self.image, self.get_blit_position())
         self.items.draw(surface)
-        self.attributes.draw()
-        # if self.jump.jump:
-        item = self.items.items['weapon']['item']
-        surface.blit(item.image, item.rect)
+        #self.attributes.draw()
+
         # pygame.draw.rect(surface, (255, 255, 255), self.rect, 1)
         # pygame.draw.rect(surface, (255, 255, 255), self.hitbox, 1)

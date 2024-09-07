@@ -42,7 +42,7 @@ class GoldDagger(Weapon):
         else:
             self.mouse_timer = self.special_attack_cooldown
         if self.mouse_timer < 0 and self.dupa:
-            self.game.particle_manager.add_particle(AttackReady(self.player.hitbox.topleft, self.player))
+            self.game.particle_manager.add_particle(AttackReady(self.entity.hitbox.topleft, self.entity))
             self.dupa = False
 
     def input(self):
@@ -50,7 +50,7 @@ class GoldDagger(Weapon):
         for event in self.game.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # INITIALISE SPECIAL ATTACK TIMER
                 self.init_timer = True
-            if event.type == pygame.MOUSEBUTTONUP and not self.special_attack and self.mouse_timer < 0:  # if enough time is waited, initialise special attack
+            if event.type == pygame.MOUSEBUTTONUP and not self.special_attack and self.mouse_timer < 0:  # if enough time has passed, initialise special attack
                 for par in self.game.particle_manager.particles:
                     if isinstance(par, AttackReady):
                         par.alive = False
@@ -72,7 +72,7 @@ class GoldDagger(Weapon):
             self.attacks = [0, 150, 150, 300, 75]
         if self.wait(self.timer, self.attacks[self.index]):
             self.timer = pygame.time.get_ticks()
-            self.game.particle_manager.add_particle(Slash(self.player, self))
+            self.game.particle_manager.add_particle(Slash(self.entity, self))
             self.index += 1
         if self.index == 5:
             self.special_attack = False
@@ -80,12 +80,12 @@ class GoldDagger(Weapon):
 
     def normal_attack_update(self):
         if self.normal_attack:
-            self.game.particle_manager.add_particle(Slash(self.player, self))
+            self.game.particle_manager.add_particle(Slash(self.entity, self))
             self.normal_attack = False
 
     def update(self):
         super().update()
-        if self.player:
+        if self.entity:
             self.input()
             self.update_special_timer()
             self.special_attack_update()

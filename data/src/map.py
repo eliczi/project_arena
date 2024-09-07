@@ -1,7 +1,7 @@
 import pygame
 from .setup import get_mask_rect
 import csv, os
-
+from .GameElement import GameElement
 world_size = (1600, 768)
 
 
@@ -52,7 +52,7 @@ class TileMap:
         self.load_map()
 
     def resize(self):
-        self.tile_size = self.game.camera.zoom * self.original_tile_size
+        self.tile_size = self.game.camera.zoom_factor * self.original_tile_size
         self.load_tiles(self.csv_map)
         self.load_map()
 
@@ -87,10 +87,10 @@ class TileMap:
         self.tiles = tiles
 
 
-class Map:
+class Map(GameElement):
 
     def __init__(self, game):
-        self.game = game
+        super().__init__(game)
         self.tile_maps = []
         self.wall_list = []
         self.load_tile_maps()
@@ -102,7 +102,7 @@ class Map:
         self.size = world_size
 
     def resize(self):
-        size = (self.dupa[0] * self.game.camera.zoom, self.dupa[1] * self.game.camera.zoom)
+        size = (self.dupa[0] * self.game.camera.zoom_factor, self.dupa[1] * self.game.camera.zoom_factor)
         self.image = pygame.transform.scale(self.original_image, size)
 
     def load_tile_maps(self):
@@ -121,12 +121,17 @@ class Map:
             # for tile in tile_map.tiles:
             #     if tile.hitbox is not None:
             #         pygame.draw.rect(self.original_image, (255, 255, 255), tile.hitbox, 1)
-
+        
     def draw(self, surface):
-        if self.game.player.bullets:
-            surface.blit(self.image, self.game.camera.center_blit(self, self.game.player.bullets[0]))
-        else:
-            surface.blit(self.image, self.game.camera.blit_position(self))
+        x, y = self.get_blit_position()
+        surface.blit(self.image, (x, y))
+        # if self.game.camera.camera_target:
+        #     surface.blit(self.image, self.game.camera.center_blit(self))
+        # # if self.game.player.bullets:
+        # #     surface.blit(self.image, self.game.camera.center_blit(self, self.game.player))
+        # else:
+        #     #surface.blit(self.image, self.game.camera.center_blit(self, self.game.player))
+        #     surface.blit(self.image, self.game.camera.blit_position(self))
 
         # pygame.draw.rect(surface, (255, 255, 255), self.rect, 1)
 

@@ -23,6 +23,7 @@ from data.src.vfx.ground_ripple import Crack
 class Game:
 
     def __init__(self):
+        self.camera = Camera(self)
         self.display = Display(self)
         self.time = Time(self)
         self.screen_position = (0, 0)
@@ -32,8 +33,7 @@ class Game:
         self.object_manager = ObjectManager(self)
         self.enemy_manager = EnemyManager(self)
         self.npc_manager = NpcManager(self)
-        self.camera = Camera(self)
-        self.map = Market(self)
+        self.map = Arena(self)
         self.menu = MainMenu(self)
         self.rect = pygame.Rect(0, 0, 250, 250)
         self.events = []
@@ -43,13 +43,17 @@ class Game:
 
     def init(self):
         self.npc_manager.populate()
+        #self.camera.camera_target = self.player
 
     def update(self):
+        
         self.time.update()
+        
         self.display.update_screen()
+        
         self.npc_manager.update()
-        self.input()
         self.player.update()
+        self.input()
         self.enemy_manager.update()
         self.object_manager.update()
         self.particle_manager.update()
@@ -57,16 +61,18 @@ class Game:
 
     def draw(self):
         self.display.particle_screen.fill((0, 0, 0, 0))
+        self.camera.update()
         self.map.draw(self.display.screen)
         self.enemy_manager.draw(self.display.screen)
-        self.npc_manager.draw(self.display.screen)
+        #self.npc_manager.draw(self.display.screen)
         self.particle_manager.draw(self.display.particle_screen)
+        #self.particle_manager.draw(self.display.screen)
         self.display.blit_particle_screen()
+        
         self.player.draw(self.display.screen)
-
         self.object_manager.draw()
-
         self.time.draw_fps()
+
         self.display.blit_display()
 
     def input(self):
@@ -78,10 +84,18 @@ class Game:
         # for event in self.events:
         #     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not self.player.jump.jump:
         #         self.particle_manager.add_particle(Crack((mx, my)))
-        #self.camera.input()
+        self.camera.input()
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_ESCAPE] and wait(self, self.cooldown, 250) and self.can_close:
             self.running = False
+        if pressed[pygame.K_t] and wait(self, self.cooldown, 250):
+            self.cooldown = pygame.time.get_ticks()
+            if self.camera.camera_target is None:
+                self.camera.camera_target = self.player
+                self.camera.zoom(zoom_factor=1.5, zoom_type='in')
+            else:
+                self.camera.camera_target = None
+                self.camera.zoom(zoom_factor=1.5, zoom_type='out')
 
     def run_game(self):
         while self.running:

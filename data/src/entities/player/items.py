@@ -98,6 +98,10 @@ class Items:
             self.draw_eq_items()
             surface.blit(self.image, self.rect)
 
+        for key, item in self.items.items():
+            if item['item'] is not None:
+                item['item'].draw(surface)
+
     def assign_item(self, item, entity):
         self.items[item.type]['item'] = item
         item.entity = entity

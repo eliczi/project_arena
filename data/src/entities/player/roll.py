@@ -39,7 +39,7 @@ class Roll:
             self.roll_destination = [0, 0]  # reseting roll destination
             self.assign_roll_destination()  # assigning new role destination
 
-    def rolling(self):
+    def update(self):
         if not self.roll:
             self.player.targetable = True
             return

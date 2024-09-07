@@ -1,6 +1,6 @@
 import pygame
 
-world_size = (1600, 768 + 64)
+world_size = (1600, 832)
 import random
 from data.src.utils.utils import wait
 
@@ -37,7 +37,9 @@ class Display:
         self.particle_screen = pygame.Surface((world_size[0] / 4, world_size[1] / 4),
                                               pygame.SRCALPHA).convert_alpha()
         self.dest_surf = pygame.Surface((world_size[0], world_size[1]), pygame.SRCALPHA).convert_alpha()
-        self.surface = None
+        self.surface = pygame.transform.scale(self.particle_screen.copy(),
+                                               (world_size[0] * self.game.camera.zoom_factor,
+                                                world_size[1] * self.game.camera.zoom_factor))
         self.timer = 0
 
     def blit_default_particle_screen(self):
@@ -47,25 +49,39 @@ class Display:
             (0, 0))
 
     def blit_resized_particle_screen(self):
-        x = (0 - self.game.camera.zoom_target_x) * self.game.camera.zoom
-        y = (0 - self.game.camera.zoom_target_y) * self.game.camera.zoom
-        position = (x + self.game.camera.zoom_target_x, y + self.game.camera.zoom_target_y)
-
+        #If the camera follows some object, the screen will be centered on that object
+        #and self.game.player is the object in this case
+        x, y = 0,0
+        if self.game.camera.camera_target:
+            x = (800 - self.game.player.rect.topleft[0] * self.game.camera.zoom_factor) 
+            y = (768 / 2 - self.game.player.rect.topleft[1]*  self.game.camera.zoom_factor) 
+        else:
+            x = (800 - self.game.camera.zoom_target_x * self.game.camera.zoom_factor)  # / self.game.camera.zoom
+            y = (768 / 2 - self.game.camera.zoom_target_y * self.game.camera.zoom_factor)  # / self.game.camera.zoom
+        position = (x, y)
+        #Using the dest surface increases the performance, 
+        if self.game.camera.zoom_change:
+            self.dest_surf = pygame.Surface((world_size[0]* self.game.camera.zoom_factor, world_size[1]* self.game.camera.zoom_factor), pygame.SRCALPHA).convert_alpha()
+        elif self.game.camera.zoom_factor == 1:
+            self.dest_surf = pygame.Surface((world_size[0], world_size[1]), pygame.SRCALPHA).convert_alpha()
         self.surface = pygame.transform.scale(self.particle_screen.copy(),
-                                              (world_size[0] * self.game.camera.zoom,
-                                               world_size[1] * self.game.camera.zoom))
+                                               (world_size[0] * self.game.camera.zoom_factor,
+                                                world_size[1] * self.game.camera.zoom_factor), 
+                                                self.dest_surf)
+        
+
         self.screen.blit(self.surface, position)
+        #pygame.draw.rect(self.game.display.screen, (244, 123, 32), self.surface.get_rect(), 3)
 
     def blit_particle_screen(self):
-        if self.game.camera.zoom == 1:
-            self.blit_default_particle_screen()
-        else:
-            self.blit_resized_particle_screen()
+        # if self.game.camera.zoom == 1:
+        #     self.blit_default_particle_screen()
+        # else:
+        self.blit_resized_particle_screen()
 
     def update_screen(self):
         self.screen_shake()
-
-    # self.screen.fill((0, 0, 0))
+        self.screen.fill((0, 0, 0))
 
     def blit_display(self):
         position = ((self.display.get_width() - world_size[0]) / 2, (self.display.get_height() - world_size[1]) / 2)

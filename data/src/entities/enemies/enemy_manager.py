@@ -1,6 +1,7 @@
 import pygame
 from data.src.entities.enemies.enemy import Enemy
-
+from data.src.entities.enemies.necromancer import Necromancer
+from data.src.entities.enemies.crying_skeleton import CryingSkeleton
 
 class EnemyManager:
     def __init__(self, game):
@@ -28,4 +29,4 @@ class EnemyManager:
         if pygame.mouse.get_pressed()[2] and pygame.time.get_ticks() - self.dupa > 1000:
             self.dupa = pygame.time.get_ticks()
             pos = pygame.mouse.get_pos()
-            self.add_enemy(Enemy(self.game, pos))
+            self.add_enemy(CryingSkeleton(self.game, pos))

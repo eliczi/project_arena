@@ -7,23 +7,26 @@ class Ripple:
 
     def __init__(self, position):
         self.width = 5
+        self.max_width = 150
         self.alive = True
         self.position = [int(x / 4) for x in position]
-        self.life = random.randint(7, 25)
+        self.max_life = 170
+        self.life = self.max_life
         self.rect = pygame.Rect(*position, self.width, self.width / 2)
         self.speed = 100
+        self.new_ripple = True
 
     def update(self, dt):
-        self.width += dt * self.speed * 1.5
-        self.life -= 0.25
-        if self.life <= 0:
+        self.width += dt * self.speed * 1.5 * 3
+        self.life -= 1
+        if self.life <= 0 or self.width >= self.max_width:
             self.alive = False
-        self.position[0] -= dt * self.speed * 1.5
+        self.position[0] -= dt * self.speed * 1.5 * 3
 
     def draw(self, surface):
         rect = pygame.Rect(self.position[0] + self.width / 2, self.position[1] - self.width / 4, self.width,
                            self.width / 2)
-        pygame.draw.ellipse(surface, (255, 255, 255), rect, 1)
+        pygame.draw.ellipse(surface, (123, 66, 35), rect, random.randint(1, 2))
 
 
 class Crack:
@@ -59,7 +62,7 @@ class Crack:
 
     def draw(self, surface):
         for crack in self.cracks:
-            if self.num_of_crack >=2:
+            if self.num_of_crack >= 2:
                 pygame.draw.lines(surface, (123, 66, 35), points=crack[:int(self.num_of_crack)], width=1, closed=False)
 
     def update(self, dt):
@@ -73,7 +76,7 @@ class Crack:
             self.dupa = False
             self.final_timer = pygame.time.get_ticks()
         if wait(self.game, self.timer, 50) and self.alive:
-            self.num_of_crack += dt * 200
+            self.num_of_crack += dt * 25
 
 
 class GroundRipple:
@@ -86,30 +89,33 @@ class GroundRipple:
         self.max_ripples = random.randint(5, 8)
         self.max_radius = 10
         self.alive = True
-        self.generate_ripples = True
         self.crack = Crack(position, self.game)
 
-    def populate_ripples(self):
-        for r in range(self.number_of_ripples):
-            self.ripples.append(Ripple(self.center))
-
-    def terminate(self):
-        return all([not ripple.alive for ripple in self.ripples])
+    def delete_dead_ripples(self):
+        self.ripples = [ripple for ripple in self.ripples if ripple.alive]
 
     def draw(self, surface):
         for ripple in self.ripples:
             ripple.draw(surface)
         self.crack.draw(surface)
 
+    def generate_ripples(self):
+        if self.number_of_ripples < self.max_ripples:
+            if len(self.ripples) == 1 and self.ripples[0].life <= self.ripples[0].max_life /  1.05:
+                self.ripples.append(Ripple(self.center))
+                self.number_of_ripples += 1
+            elif 2 <= len(self.ripples) <= self.max_ripples:
+                for ripple1, ripple2 in zip(self.ripples, self.ripples[1:]):
+                    if ripple1.life <= ripple1.max_life / 1.05 and ripple1.new_ripple:
+                        self.ripples.append(Ripple(self.center))
+                        ripple1.new_ripple = False
+                        self.number_of_ripples += 1
+
     def update(self, dt):
-        if self.terminate():
-            self.generate_ripples = False
-        if self.generate_ripples:
-            for ripple in self.ripples:
-                if ripple.life < 10 and self.number_of_ripples < self.max_ripples:
-                    self.number_of_ripples += 1
-                    self.ripples.append(Ripple(self.center))
-                ripple.update(dt)
+        self.delete_dead_ripples()
+        self.generate_ripples()
+        for ripple in self.ripples:
+            ripple.update(dt)
         if self.crack.chuj:
             self.crack.update(dt)
         else:

@@ -119,12 +119,12 @@ class Inventory:
         item = self.items[self.clicked]
         player = self.game.player
         if item.price <= player.attributes.gold:
-            if player.items.items['weapon']['item'] is None:
-                player.items.items['weapon']['item'] = item
-                self.items[self.clicked] = None
-                player.attributes.gold -= item.price
-                self.clicked = -1
-                item.player = player
+            #if player.items.items['weapon']['item'] is None:
+            player.items.items['weapon']['item'] = item
+            self.items[self.clicked] = None
+            player.attributes.gold -= item.price
+            self.clicked = -1
+            item.player = player
 
 
 

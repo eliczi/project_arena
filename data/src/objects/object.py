@@ -145,7 +145,7 @@ class Object:
         if self.interaction:
             self.show_name.draw(surface, self.rect)
         # self.draw_merchant_information(surface)
-        pygame.draw.rect(surface, (255, 120, 250), self.rect, 5)
+        #pygame.draw.rect(surface, (255, 120, 250), self.rect, 5)
 
     def load_images(self):
         for i in range(4):

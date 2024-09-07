@@ -37,6 +37,7 @@ class Time:
         self.clock.tick()
 
     def draw_fps(self):
+        #return
         text_surface = self.font.render(f'{self.clock.get_fps()}', False, (255, 255, 255))
         self.game.display.screen.blit(text_surface, (0, 0))
 

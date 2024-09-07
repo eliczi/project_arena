@@ -2,51 +2,35 @@ import pygame
 from ..object import Object
 from pygame.math import Vector2
 import math
+from data.src.vfx.dot import Dot
 
 class WeaponSwing:
     left_swing = 10
-    right_swing = -190
+    right_swing = 190
 
     def __init__(self, weapon):
         self.weapon = weapon
-        self.angle = 0
-        self.offset = Vector2(0, -100)
-        self.offset_rotated = Vector2(0, -25)
+        self.offset = Vector2(0, -126)  # how much distant from entity
         self.counter = 0
-        self.swing_side = 1
+        self.swing_side = -1
+        self.angle = 90 * self.swing_side
+        self.center = None
 
     def reset(self):
         self.counter = 0
+        self.angle = 90
 
-    def rotate(self, weapon=None):
-        mx, my = pygame.mouse.get_pos()
-        dx = mx - self.weapon.entity.hitbox.centerx  # - 64
-        dy = my - self.weapon.entity.hitbox.centery  # - 32
-        if self.swing_side == 1:
-            self.angle = (180 / math.pi) * math.atan2(-self.swing_side * dy, dx) + self.left_swing
-        else:
-            self.angle = (180 / math.pi) * math.atan2(self.swing_side * dy, dx) + self.right_swing
-
-        position = self.weapon.entity.hitbox.center
-        if weapon:
-            self.weapon.image = pygame.transform.rotozoom(self.weapon.image, self.angle, 1)
-        else:
-            self.weapon.image = pygame.transform.rotozoom(self.weapon.original_image, self.angle, 1)
-
-        offset_rotated = self.offset.rotate(-self.angle)
-        self.weapon.rect = self.weapon.image.get_rect(center=position + offset_rotated)
-        #self.weapon.hitbox = pygame.mask.from_surface(self.weapon.image)
-        self.offset_rotated = Vector2(0, -25).rotate(-self.angle)
-
-    def swing(self):
-        self.angle += 20 * -1
-        position = self.weapon.entity.hitbox.center
+    def rotate_180(self):
+        self.angle += 1.03 * self.swing_side * self.weapon.game.time.dtf() * 400
         self.weapon.image = pygame.transform.rotozoom(self.weapon.original_image, self.angle, 1)
         offset_rotated = self.offset.rotate(-self.angle)
+        position = self.weapon.entity.hitbox.center
         self.weapon.rect = self.weapon.image.get_rect(center=position + offset_rotated)
-        #self.rect_mask = get_mask_rect(self.image, *self.rect.topleft)
-       # self.weapon.hitbox = pygame.mask.from_surface(self.weapon.image)
-        self.counter += 1
+        if self.weapon.entity:
+            self.center = self.weapon.entity.hitbox.center
+            offset_rotated = Vector2(0, -126).rotate(-self.angle)
+            center = self.center + offset_rotated
+            self.weapon.game.particle_manager.add_particle(Dot(center))
 
 
 class Weapon(Object):
@@ -76,7 +60,6 @@ class Weapon(Object):
 
     def update(self):
         super().update()
-
 
     def attack(self):
         pass

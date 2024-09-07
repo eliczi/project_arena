@@ -106,20 +106,27 @@ class Slash:
         else:
             if self.attack_rect.colliderect(self.game.player.hitbox):
                 if self.game.player not in self.hit and self.game.player.targetable:
+                    if self.game.player.hurt == False:
+                        self.game.player.hurt = True
                     self.add_effect(self.game.player.hitbox.center)
-                self.hit.append(self.game.player)
+                    self.hit.append(self.game.player)
 
     def draw(self, surface):
         if self.direction == 'left':
             self.rect.topleft = (self.entity.rect.topleft[0] - 104, self.entity.rect.topleft[1] - 14)
         else:
             self.rect.topleft = (self.entity.rect.topleft[0], self.entity.rect.topleft[1] - 14)
-        size = (self.size[0] * self.game.camera.zoom, self.size[1] * self.game.camera.zoom)
+        size = (self.size[0] * self.game.camera.zoom_factor, self.size[1] * self.game.camera.zoom_factor)
         self.image = pygame.transform.scale(self.image, size)
         if self.alive:
-            if self.direction == 'left':
-                self.game.display.screen.blit(pygame.transform.flip(self.image, 1, 0),
-                                              self.game.camera.blit_position(self))
+            x, y = 0, 0
+            if self.game.camera.camera_target:
+                x, y = self.game.camera.center_blit(self)
             else:
-                self.game.display.screen.blit(self.image, self.game.camera.blit_position(self))
-        #pygame.draw.rect(self.game.display.screen, (244, 123, 32), self.attack_rect, 1)
+                x, y = self.game.camera.blit_position(self)
+            if self.direction == 'left':
+                self.game.display.screen.blit(pygame.transform.flip(self.image, 1, 0),(x, y))
+            else:
+                self.game.display.screen.blit(self.image, (x, y))
+        #draw hitbox
+        pygame.draw.rect(self.game.display.screen, (244, 123, 32), self.attack_rect, 3)

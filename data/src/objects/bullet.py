@@ -26,5 +26,5 @@ class Bullet:
 
     def draw(self, surface):
         #position = self.game.camera.player_blit()
-        pygame.draw.circle(surface, self.color, self.game.camera.player_blit(self), 15 * self.game.camera.zoom)
+        pygame.draw.circle(surface, self.color, self.game.camera.player_blit(self), 15 * self.game.camera.zoom_factor)
         pygame.draw.rect(surface, (255, 255, 255), self.rect, 1)
